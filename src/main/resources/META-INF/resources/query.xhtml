@@ -1,0 +1,38 @@
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  template="/index.xhtml"
+>
+  <ui:define name="title">Query Product Quantity</ui:define>
+  <ui:define name="content">
+    <h:outputStylesheet library="assets" name="css/query.css" />
+
+    <div class="form-container">
+      <h:form>
+        <h1>Query Product Quantity</h1>
+        <h:messages globalOnly="true" style="margin-bottom: 15px; color: red" />
+        <div class="field">
+          <h:outputLabel for="productName" value="Product Name:" />
+          <h:inputText
+            id="productName"
+            required="true"
+            requiredMessage="Product Name is required."
+            value="#{QueryBean.productName}"
+          />
+          <h:message class="message" for="productName" styleClass="error" />
+        </div>
+        <h:commandButton
+          value="Search"
+          action="#{QueryBean.queryProductQuantity}"
+        />
+        <h:outputText
+          value="Product Quantity: #{QueryBean.productQuantity}"
+          styleClass="result"
+          rendered="#{not empty QueryBean.productQuantity}"
+        />
+      </h:form>
+    </div>
+  </ui:define>
+</ui:composition>

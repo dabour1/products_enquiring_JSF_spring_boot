@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<ui:composition
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:h="http://xmlns.jcp.org/jsf/html"
+  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:f="http://xmlns.jcp.org/jsf/core"
+  template="/index.xhtml"
+>
+  <ui:define name="title">Product Management</ui:define>
+
+  <ui:define name="content">
+    <h:outputStylesheet library="assets" name="css/product.css" />
+    <div class="container">
+      <h2>Product Management</h2>
+      <h:form>
+        <h:dataTable
+          value="#{ProductBean.products}"
+          var="product"
+          styleClass="table"
+        >
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="Product Name" />
+            </f:facet>
+            <h:outputText value="#{product.name}" />
+          </h:column>
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="Code" />
+            </f:facet>
+            <h:outputText value="#{product.code}" />
+          </h:column>
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="Price" />
+            </f:facet>
+            <h:outputText value="#{product.price}" />
+          </h:column>
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="Quantity" />
+            </f:facet>
+            <h:outputText value="#{product.quantity}" />
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">
+              <h:outputText value="Actions" />
+            </f:facet>
+            <h:commandButton
+              value="Delete"
+              action="#{ProductBean.deleteProduct(product.id)}"
+              styleClass="btn btn-danger"
+            />
+          </h:column>
+        </h:dataTable>
+      </h:form>
+      <h:form>
+        <div class="form-grid">
+          <div class="field">
+            <h:outputLabel for="productName" value="Product Name:" />
+            <h:inputText
+              id="productName"
+              value="#{ProductBean.newProduct.name}"
+              required="true"
+              requiredMessage="Product Name is required."
+            >
+              <f:validateLength minimum="2" maximum="50" />
+            </h:inputText>
+            <h:message class="message" for="productName" styleClass="error" />
+          </div>
+          <div class="field">
+            <h:outputLabel for="productCode" value="Code:" />
+            <h:inputText
+              id="productCode"
+              value="#{ProductBean.newProduct.code}"
+              required="true"
+              requiredMessage="Product Code is required."
+            >
+              <f:validateLength minimum="2" maximum="20" />
+            </h:inputText>
+            <h:message class="message" for="productCode" styleClass="error" />
+          </div>
+          <div class="field">
+            <h:outputLabel for="productPrice" value="Price:" />
+            <h:inputText
+              id="productPrice"
+              value="#{ProductBean.newProduct.price}"
+              required="true"
+              requiredMessage="Invalid product price. Please enter a valid decimal number."
+            >
+            </h:inputText>
+            <h:message class="message" for="productPrice" styleClass="error" />
+          </div>
+          <div class="field">
+            <h:outputLabel for="productQuantity" value="Quantity:" />
+            <h:inputText
+              id="productQuantity"
+              value="#{ProductBean.newProduct.quantity}"
+              required="true"
+              requiredMessage="Product Quantity is required."
+              type="number"
+            >
+            </h:inputText>
+            <h:message
+              class="message"
+              for="productQuantity"
+              styleClass="error"
+            />
+          </div>
+        </div>
+
+        <h:commandButton
+          value="Add Product"
+          action="#{ProductBean.addProduct}"
+          styleClass="btn btn-primary"
+        />
+      </h:form>
+    </div>
+  </ui:define>
+</ui:composition>
