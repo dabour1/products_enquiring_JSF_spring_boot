@@ -1,0 +1,42 @@
+name: Deploy Spring Boot App
+
+on:
+  push:
+    branches:
+      - main  # أو أي فرع حسب اختيارك
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Build project
+      run: mvn clean package -DskipTests
+
+    - name: Upload artifact via SCP
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "target/*.jar"
+        target: "${{ secrets.DEPLOY_DIR }}"
+
+    - name: Restart app on server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          pkill -f 'java.*.jar' || true
+          nohup java -jar ${{ secrets.DEPLOY_DIR }}/*.jar > app.log 2>&1 &

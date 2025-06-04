@@ -8,13 +8,13 @@ import com.task.products.services.ProductService;
 import jakarta.faces.view.ViewScoped;
 import lombok.Data;
 
-import java.io.Serializable;
+// import java.io.Serializable;
 import java.util.List;
 
 @Component(value = "ProductBean")
 @Data
 @ViewScoped
-public class ProductBean implements Serializable {
+public class ProductBean {
 
     @Autowired
     private ProductService productService;
