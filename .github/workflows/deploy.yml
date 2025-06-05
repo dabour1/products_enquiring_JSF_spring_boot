@@ -31,56 +31,56 @@ jobs:
         source: "target/products-0.0.1-SNAPSHOT.jar"
         target: "${{ secrets.DEPLOY_DIR }}"
          
-   - name: Restart Spring Boot app on server
-  uses: appleboy/ssh-action@v1.0.0
-  with:
-    host: ${{ secrets.SSH_HOST }}
-    username: ${{ secrets.SSH_USER }}
-    key: ${{ secrets.SSH_PRIVATE_KEY }}
-    script: |
-      echo "✅ Starting deployment process..."
-      
-      # Check if JAR exists
-      JAR_PATH="${{ secrets.DEPLOY_DIR }}/target/products-0.0.1-SNAPSHOT.jar"
-      if [ ! -f "$JAR_PATH" ]; then
-        echo "❌ JAR file not found at: $JAR_PATH"
-        exit 1
-      fi
-      
-      echo "✅ JAR file found at: $JAR_PATH"
-      
-      # Stop existing process
-      echo "🔄 Stopping existing Java processes..."
-      pkill -f 'products-0.0.1-SNAPSHOT.jar' || true
-      sleep 3
-      
-      # Start new process with proper detachment
-      echo "🚀 Starting new application..."
-      cd ${{ secrets.DEPLOY_DIR }}
-      
-      # Method 1: Use screen (if available)
-      if command -v screen >/dev/null 2>&1; then
-        screen -dmS spring-app java -jar target/products-0.0.1-SNAPSHOT.jar
-        echo "✅ Application started in screen session"
-      else
-        # Method 2: Use nohup with explicit redirection and disown
-        nohup java -jar target/products-0.0.1-SNAPSHOT.jar > app.log 2>&1 < /dev/null &
-        JAVA_PID=$!
-        disown $JAVA_PID
-        echo "✅ Application started with PID: $JAVA_PID"
-      fi
-      
-      # Give it a moment to start
-      sleep 3
-      
-      # Verify it's running
-      if pgrep -f 'products-0.0.1-SNAPSHOT.jar' > /dev/null; then
-        echo "✅ Application is running successfully!"
-        pgrep -f 'products-0.0.1-SNAPSHOT.jar'
-      else
-        echo "❌ Application may not have started properly"
-        echo "Checking log file..."
-        if [ -f app.log ]; then
-          tail -n 20 app.log
-        fi
-      fi
+    - name: Restart Spring Boot app on server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          echo "✅ Starting deployment process..."
+          
+          # Check if JAR exists
+          JAR_PATH="${{ secrets.DEPLOY_DIR }}/target/products-0.0.1-SNAPSHOT.jar"
+          if [ ! -f "$JAR_PATH" ]; then
+            echo "❌ JAR file not found at: $JAR_PATH"
+            exit 1
+          fi
+          
+          echo "✅ JAR file found at: $JAR_PATH"
+          
+          # Stop existing process
+          echo "🔄 Stopping existing Java processes..."
+          pkill -f 'products-0.0.1-SNAPSHOT.jar' || true
+          sleep 3
+          
+          # Start new process with proper detachment
+          echo "🚀 Starting new application..."
+          cd ${{ secrets.DEPLOY_DIR }}
+          
+          # Method 1: Use screen (if available)
+          if command -v screen >/dev/null 2>&1; then
+            screen -dmS spring-app java -jar target/products-0.0.1-SNAPSHOT.jar
+            echo "✅ Application started in screen session"
+          else
+            # Method 2: Use nohup with explicit redirection and disown
+            nohup java -jar target/products-0.0.1-SNAPSHOT.jar > app.log 2>&1 < /dev/null &
+            JAVA_PID=$!
+            disown $JAVA_PID
+            echo "✅ Application started with PID: $JAVA_PID"
+          fi
+          
+          # Give it a moment to start
+          sleep 3
+          
+          # Verify it's running
+          if pgrep -f 'products-0.0.1-SNAPSHOT.jar' > /dev/null; then
+            echo "✅ Application is running successfully!"
+            pgrep -f 'products-0.0.1-SNAPSHOT.jar'
+          else
+            echo "❌ Application may not have started properly"
+            echo "Checking log file..."
+            if [ -f app.log ]; then
+              tail -n 20 app.log
+            fi
+          fi
