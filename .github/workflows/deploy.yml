@@ -40,5 +40,5 @@ jobs:
         script: |
           echo "✅ running updated script..."
           pkill -f 'java.*.jar' || true
-          nohup java -jar ${{ secrets.DEPLOY_DIR }}/products-0.0.1-SNAPSHOT.jar > ${{ secrets.DEPLOY_DIR }}/app.log 2>&1 &
+          nohup java -jar ${{ secrets.DEPLOY_DIR }}/target/products-0.0.1-SNAPSHOT.jar > ${{ secrets.DEPLOY_DIR }}/app.log 2>&1 &
 
