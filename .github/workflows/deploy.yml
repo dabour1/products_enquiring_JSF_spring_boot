@@ -8,20 +8,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+     
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
-
+     
     - name: Build project with Maven
       run: mvn clean package -DskipTests
-
+     
     - name: Upload JAR to server via SCP
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -30,55 +30,35 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         source: "target/products-0.0.1-SNAPSHOT.jar"
         target: "${{ secrets.DEPLOY_DIR }}"
-
+         
     - name: Restart Spring Boot app on server
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        # If you need a non‐standard port, add “port: 2222” or similar here
         script: |
           echo "✅ Starting deployment process..."
-
-          # 1) Verify the JAR actually landed in $DEPLOY_DIR
-          JAR_PATH="${{ secrets.DEPLOY_DIR }}/products-0.0.1-SNAPSHOT.jar"
+          
+          # Check if JAR exists
+          JAR_PATH="${{ secrets.DEPLOY_DIR }}/target/products-0.0.1-SNAPSHOT.jar"
           if [ ! -f "$JAR_PATH" ]; then
             echo "❌ JAR file not found at: $JAR_PATH"
             exit 1
           fi
-          echo "✅ JAR file found: $JAR_PATH"
-
-          # 2) Kill any running instance of the old JAR
-          echo "🔄 Stopping existing Java processes…"
-          pkill -f 'products-0.0.1-SNAPSHOT.jar' || true
-          sleep 2
-
-          # 3) Start the new JAR in background (detached)
-          echo "🚀 Launching new application…"
-          cd "${{ secrets.DEPLOY_DIR }}"
           
-          # If you prefer screen, uncomment these two lines:
-          # if command -v screen >/dev/null 2>&1; then
-          #   screen -dmS spring-app java -jar products-0.0.1-SNAPSHOT.jar
-          #   echo "✅ Started in screen session"
-          #   exit 0
-          # fi
-
-          # Otherwise, use nohup+disown:
-          nohup java -jar products-0.0.1-SNAPSHOT.jar > app.log 2>&1 < /dev/null &
-          disown $!
-
-          echo "✅ java -jar products-0.0.1-SNAPSHOT.jar started. (Log → app.log)"
-          sleep 3
-
-          # 4) Verify it’s running
-          if pgrep -f 'products-0.0.1-SNAPSHOT.jar' > /dev/null; then
-            echo "✅ Application is running!"
-            pgrep -f 'products-0.0.1-SNAPSHOT.jar'
-            exit 0
+          echo "✅ JAR file found, restarting service..."
+          
+          # Restart the systemd service
+          sudo systemctl restart spring-app
+          sleep 5
+          
+          # Check service status
+          if sudo systemctl is-active --quiet spring-app; then
+            echo "✅ Spring Boot application is running!"
+            sudo systemctl status spring-app --no-pager -l
           else
-            echo "❌ Application failed to start."
-            [ -f app.log ] && echo "--- last 20 lines of app.log ---" && tail -n 20 app.log
+            echo "❌ Failed to start Spring Boot application"
+            sudo systemctl status spring-app --no-pager -l
             exit 1
           fi
